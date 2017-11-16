@@ -3,7 +3,6 @@
 NXAPI script inspired by this question:
   https://supportforums.cisco.com/t5/unified-computing-system/nexus-interface-bulk-range-selection/m-p/3217057
 """
-
 import json
 import requests
 
@@ -12,8 +11,7 @@ nx_username = "admin"
 nx_password = "password"
 nx_port = "8080"
 
-headers_jsonrpc = {"content-type": "application/json-rpc"}
-headers_json = {"content-type": "application/json"}
+request_header = {"content-type": "application/{0}"}
 
 int_target_state = "sfpAbsent"
 
@@ -21,12 +19,12 @@ non_routed_vlan = 5
 int_command = "int {0}; switchport access vlan {1}; switchport mode access; shutdown; "
 
 
-def nxapi_call(host, payload, headers):
+def nxapi_request(host, payload, content_type="json"):
     url = "http://{0}:{1}/ins".format(host, nx_port)
     try:
         response = requests.post(url,
                                  data=json.dumps(payload),
-                                 headers=headers,
+                                 headers={"content-type": "application/{0}".format(content_type)},
                                  auth=(nx_username, nx_password),
                                  timeout=4)
     except requests.exceptions.ConnectTimeout as exc_info:
@@ -41,6 +39,7 @@ def nxapi_call(host, payload, headers):
                 reason=exc_info.response.reason))
         return None
 
+    print(response.text)
     return response.json()
 
 
@@ -52,8 +51,7 @@ def apply_config_commands(host, config_commands):
                            "input": config_commands,
                            "output_format": "json"}}
 
-    response = nxapi_call(host, payload, headers_json)
-
+    response = nxapi_request(host, payload)
     print(response)
 
 
@@ -63,7 +61,7 @@ def create_config_commands(host):
     ]
     config_commands = ""
 
-    response = nxapi_call(host, payload, headers_jsonrpc)
+    response = nxapi_request(host, payload, "json-rpc")
     if response is None:
         return None
 
@@ -87,6 +85,7 @@ def main():
         config_commands = create_config_commands(host)
         print(config_commands)
         if config_commands is not None:
+            print("hello!")
             apply_config_commands(host, config_commands)
 
 
