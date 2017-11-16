@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-'''
+"""
 NXAPI script inspired by this question:
   https://supportforums.cisco.com/t5/unified-computing-system/nexus-interface-bulk-range-selection/m-p/3217057
-'''
+"""
 
 import json
 import requests
@@ -59,10 +59,8 @@ def apply_config_commands(host, config_commands):
 
 def create_config_commands(host):
     payload = [
-        {"jsonrpc": "2.0","method": "cli", "params": {"cmd": "show int status", "version": 1.2}, "id": 1},
+        {"jsonrpc": "2.0", "method": "cli", "params": {"cmd": "show int status", "version": 1.2}, "id": 1},
     ]
-
-    target_interfaces = []
     config_commands = ""
 
     response = nxapi_call(host, payload, headers_jsonrpc)
@@ -71,8 +69,6 @@ def create_config_commands(host):
 
     for interface in response["result"]["body"]["TABLE_interface"]["ROW_interface"]:
         if interface["state"] == int_target_state:
-            target_interfaces.append(interface["interface"])
-
             config_commands += int_command.format(interface["interface"], non_routed_vlan)
 
     if config_commands.endswith("; "):
