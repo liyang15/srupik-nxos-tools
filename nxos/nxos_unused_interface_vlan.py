@@ -42,10 +42,10 @@ def create_config_commands():
                 interfaces.append(int_name)
         elif args.notconnect_only and int_state in notconnect_target_state:
             config_commands += int_command.format(interface["interface"], non_routed_vlan)
-            interface.append(int_name)
+            interfaces.append(int_name)
         elif args.no_sfp_only and int_state in no_sfp_target_state:
             config_commands += int_command.format(interface["interface"], non_routed_vlan)
-            interface.append(int_name)
+            interfaces.append(int_name)
     if config_commands.endswith("; "):
         config_commands = config_commands[:-2]
     if len(config_commands) > 0:    
